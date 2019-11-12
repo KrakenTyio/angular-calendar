@@ -42,10 +42,11 @@ import {
   getDefaultEventEnd,
   getMinimumEventHeightInMinutes,
   addDaysWithExclusions,
-  trackByDayOrWeekEvent,
   isDraggedWithinPeriod,
   shouldFireDroppedEvent,
-  getWeekViewPeriod
+  getWeekViewPeriod,
+  trackByWeekAllDayEvent,
+  trackByWeekTimeEvent
 } from '../common/util';
 import { DateAdapter } from '../../date-adapters/date-adapter';
 import {
@@ -121,7 +122,7 @@ export interface CalendarWeekViewBeforeRenderEvent extends WeekView {
           <div
             *ngFor="
               let allDayEvent of eventRow.row;
-              trackBy: trackByDayOrWeekEvent
+              trackBy: trackByWeekAllDayEvent
             "
             #event
             class="cal-event-container"
@@ -240,11 +241,21 @@ export interface CalendarWeekViewBeforeRenderEvent extends WeekView {
             class="cal-day-column"
             *ngFor="let column of view.hourColumns; trackBy: trackByHourColumn"
           >
+            <mwl-calendar-week-view-current-time-marker
+              [columnDate]="column.date"
+              [dayStartHour]="dayStartHour"
+              [dayStartMinute]="dayStartMinute"
+              [dayEndHour]="dayEndHour"
+              [dayEndMinute]="dayEndMinute"
+              [hourSegments]="hourSegments"
+              [hourSegmentHeight]="hourSegmentHeight"
+              [customTemplate]="currentTimeMarkerTemplate"
+            ></mwl-calendar-week-view-current-time-marker>
             <div class="cal-events-container">
               <div
                 *ngFor="
                   let timeEvent of column.events;
-                  trackBy: trackByDayOrWeekEvent
+                  trackBy: trackByWeekTimeEvent
                 "
                 #event
                 class="cal-event-container"
@@ -531,6 +542,11 @@ export class CalendarWeekViewComponent implements OnChanges, OnInit, OnDestroy {
   @Input() daysInWeek: number;
 
   /**
+   * A custom template to use for the current time marker
+   */
+  @Input() currentTimeMarkerTemplate: TemplateRef<any>;
+
+  /**
    * Called when a header week day is clicked. Adding a `cssClass` property on `$event.day` will add that class to the header element
    */
   @Output()
@@ -654,7 +670,12 @@ export class CalendarWeekViewComponent implements OnChanges, OnInit, OnDestroy {
   /**
    * @hidden
    */
-  trackByDayOrWeekEvent = trackByDayOrWeekEvent;
+  trackByWeekAllDayEvent = trackByWeekAllDayEvent;
+
+  /**
+   * @hidden
+   */
+  trackByWeekTimeEvent = trackByWeekTimeEvent;
 
   /**
    * @hidden

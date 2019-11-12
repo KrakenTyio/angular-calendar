@@ -46,12 +46,24 @@ export const trackByHourSegment = (
 export const trackByHour = (index: number, hour: WeekViewHour) =>
   hour.segments[0].date.toISOString();
 
-export const trackByDayOrWeekEvent = (
+export const trackByWeekAllDayEvent = (
   index: number,
-  weekEvent: WeekViewAllDayEvent | WeekViewTimeEvent
+  weekEvent: WeekViewAllDayEvent
+) => (weekEvent.event.id ? weekEvent.event.id : weekEvent.event);
+
+export const trackByWeekTimeEvent = (
+  index: number,
+  weekEvent: WeekViewTimeEvent
 ) => (weekEvent.event.id ? weekEvent.event.id : weekEvent.event);
 
 const MINUTES_IN_HOUR = 60;
+
+function getPixelAmountInMinutes(
+  hourSegments: number,
+  hourSegmentHeight: number
+) {
+  return MINUTES_IN_HOUR / (hourSegments * hourSegmentHeight);
+}
 
 export function getMinutesMoved(
   movedY: number,
@@ -63,8 +75,10 @@ export function getMinutesMoved(
     movedY,
     eventSnapSize || hourSegmentHeight
   );
-  const pixelAmountInMinutes =
-    MINUTES_IN_HOUR / (hourSegments * hourSegmentHeight);
+  const pixelAmountInMinutes = getPixelAmountInMinutes(
+    hourSegments,
+    hourSegmentHeight
+  );
   return draggedInPixelsSnapSize * pixelAmountInMinutes;
 }
 
@@ -73,7 +87,7 @@ export function getMinimumEventHeightInMinutes(
   hourSegmentHeight: number
 ) {
   return (
-    (MINUTES_IN_HOUR / (hourSegments * hourSegmentHeight)) * hourSegmentHeight
+    getPixelAmountInMinutes(hourSegments, hourSegmentHeight) * hourSegmentHeight
   );
 }
 

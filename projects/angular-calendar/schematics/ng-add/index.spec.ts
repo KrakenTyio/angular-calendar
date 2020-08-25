@@ -1,6 +1,6 @@
 import {
   SchematicTestRunner,
-  UnitTestTree
+  UnitTestTree,
 } from '@angular-devkit/schematics/testing';
 import { getWorkspace } from '@schematics/angular/utility/config';
 
@@ -47,7 +47,7 @@ describe('angular-calendar schematics', () => {
   it('should add angular-calendar to dependencies', async () => {
     const { name, version } = {
       name: 'angular-calendar',
-      version: angularCalendarVersion
+      version: angularCalendarVersion,
     };
     tree = await runner
       .runSchematicAsync('ng-add', defaultOptions, appTree)
@@ -87,6 +87,26 @@ describe('angular-calendar schematics', () => {
     expect(rootModule).contain(calendarModuleImport);
   });
 
+  it('should import angular-calendar module to root module when passed as an option', async () => {
+    const rootModulePath = `/projects/${projectName}/src/app/app.module.ts`;
+    tree = await runner
+      .runSchematicAsync(
+        'ng-add',
+        {
+          ...defaultOptions,
+          module: 'src/app/app.module.ts',
+        },
+        appTree
+      )
+      .toPromise();
+    expect(tree.files).contain(rootModulePath);
+
+    const rootModule = tree.readContent(rootModulePath);
+
+    const calendarModuleImport = `import { CalendarModule, DateAdapter } from 'angular-calendar';`;
+    expect(rootModule).contain(calendarModuleImport);
+  });
+
   it('should add angular-calendar css to architect builder', async () => {
     tree = await runner
       .runSchematicAsync('ng-add', defaultOptions, appTree)
@@ -108,7 +128,7 @@ describe('angular-calendar schematics', () => {
         'ng-add',
         {
           ...defaultOptions,
-          dateAdapter: 'moment'
+          dateAdapter: 'moment',
         },
         appTree
       )
